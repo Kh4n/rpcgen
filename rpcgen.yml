@@ -1,0 +1,5 @@
+folder: services
+output_folder: generated
+go:
+  package: generated
+  fiber_import: "github.com/gofiber/fiber/v2"

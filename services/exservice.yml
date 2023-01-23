@@ -1,0 +1,12 @@
+models:
+  User:
+    name: string
+    id: string
+services:
+  HelloService:
+    SayHello:
+      return: string
+      echo: string
+      count: int32
+    Other:
+      arg: map[string]int32
