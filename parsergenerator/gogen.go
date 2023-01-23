@@ -109,7 +109,7 @@ func generateService(name string, s service, ctx *Context) (*serviceOutput, erro
 	serviceInterface := generator.NewInterface(name)
 	fiberInitializer := generator.NewFunc(
 		nil,
-		generator.NewFuncSignature("initializeFiber"+name).
+		generator.NewFuncSignature("InitializeFiber"+name).
 			AddParameters(generator.NewFuncParameter("app", "*fiber.App")).
 			AddParameters(generator.NewFuncParameter("service", name)),
 	)
