@@ -138,7 +138,7 @@ func generateService(name string, s service, ctx *Context) (*serviceOutput, erro
 			return nil, err
 		}
 		ret.paramsStructs = append(ret.paramsStructs, paramsStructStr)
-		fiberInitializer = fiberInitializer.AddStatements(generateFiberInit(name, funcName, paramsStructName, fields), generator.NewNewline())
+		fiberInitializer = fiberInitializer.AddStatements(generateFiberInit(name, funcName, funcArgsOrReturn, paramsStructName, fields), generator.NewNewline())
 	}
 	serviceInterfaceStr, err := serviceInterface.Generate(0)
 	if err != nil {
@@ -155,10 +155,10 @@ func generateService(name string, s service, ctx *Context) (*serviceOutput, erro
 	return &ret, nil
 }
 
-func generateFiberInit(serviceName string, funcName string, paramsStructName string, fieldNames []string) generator.Statement {
+func generateFiberInit(serviceName string, funcName string, funcDef funcDef, paramsStructName string, fieldNames []string) generator.Statement {
 	varName := "var" + paramsStructName
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s.%s(", serviceName, funcName))
+	sb.WriteString(fmt.Sprintf("service.%s(", funcName))
 	for i, f := range fieldNames {
 		sb.WriteString(fmt.Sprintf("%s.%s", varName, capitalFirst(f)))
 		if i != len(fieldNames)-1 {
@@ -166,7 +166,16 @@ func generateFiberInit(serviceName string, funcName string, paramsStructName str
 		}
 	}
 	sb.WriteString(")")
-	serviceCall := sb.String()
+	var serviceCall string
+	var returnStr string
+	if hasReturn(funcDef) {
+		serviceCall = fmt.Sprintf("\nret, err := %s", sb.String())
+		returnStr = "\nreturn c.JSON(ret)"
+	} else {
+		serviceCall = fmt.Sprintf("\nerr = %s", sb.String())
+		returnStr = "\nreturn c.SendStatus(fiber.StatusOK)"
+	}
+
 	errStr := `
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"message": err.Error()})
@@ -175,11 +184,10 @@ func generateFiberInit(serviceName string, funcName string, paramsStructName str
 		fmt.Sprintf("\n%s := new(%s)", varName, paramsStructName) +
 		fmt.Sprintf("\nerr := c.BodyParser(%s)", varName) +
 		errStr +
-		fmt.Sprintf("\nret, err := %s", serviceCall) +
+		serviceCall +
 		errStr +
-		"\nreturn c.JSON(ret)" +
+		returnStr +
 		"\n})"
-	println(stmt)
 	return generator.NewRawStatement(stmt)
 }
 

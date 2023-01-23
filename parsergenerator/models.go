@@ -13,6 +13,11 @@ type model map[string]rawType
 type service map[string]funcDef
 type funcDef map[string]rawType
 
+func hasReturn(f funcDef) bool {
+	_, present := f["return"]
+	return present
+}
+
 func validateGenDef(g *GenDef) error {
 	for modelName, model := range g.Models {
 		if isKeyword(modelName) {

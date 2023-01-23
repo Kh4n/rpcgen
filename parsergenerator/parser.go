@@ -11,12 +11,12 @@ type Context struct {
 
 type Options struct {
 	Folder       string
-	OutputFolder string
+	OutputFolder string `yaml:"output_folder"`
 	Go           GoOptions
 }
 type GoOptions struct {
 	Package     string
-	FiberImport string
+	FiberImport string `yaml:"fiber_import"`
 }
 
 type Generator interface {

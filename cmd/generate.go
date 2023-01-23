@@ -4,6 +4,7 @@ Copyright © 2023 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -55,6 +56,7 @@ var generateCmd = &cobra.Command{
 			log.Fatalln("unable to parse:", err)
 		}
 		outPath := path.Join(opts.OutputFolder, opts.OutputFolder+".go")
+		fmt.Println("writing to:", outPath)
 		err = os.WriteFile(outPath, []byte(*ret), 0644)
 		if err != nil {
 			log.Fatalln("unable to write file", outPath, ":", err)
